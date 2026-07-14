@@ -142,7 +142,16 @@ The pitfalls above are syntactic — caught by lint or first compile. The ones b
 
 ## Code search strategy
 
-When the agent has **code semantic search** (`CodeSemanticSearch`) and **structural/graph search** (`CodeGraphSearch`) capabilities, **prioritize these over plain text search** (`grep`, `glob`). Use semantic search for "how/where/what" questions and graph search for tracing call chains, dependencies, and impact analysis. Fall back to `grep`/`glob` only for exact symbol lookups or file name matching.
+Choose the right search tool for the task rather than always defaulting to one:
+
+- **CodeSemanticSearch** - for "how/where/what" questions, exploring unfamiliar code, finding code by meaning when you don't know the exact symbol name. Reuse the user's exact wording when possible.
+- **CodeGraphSearch** - for tracing call chains, dependencies, impact analysis ("what breaks if I change X?"), and execution paths. Use `graph_depth=1` for direct callers/callees, `2` for transitive context (default), `3` for broad impact analysis. Extract symbols from the query first - if none match, it degrades to semantic matching.
+- **grep** - for exact symbol lookups, exact string/pattern matching, counting occurrences, and searching for specific imports/exports when you know the name. Also the fallback when semantic/graph search returns no results.
+- **glob** - for finding files by name pattern (e.g., `**/*.graphql`, `src/**/*.ts`) or locating files by naming convention. Use over `ls` for file discovery.
+- **read** - for reading known file paths or specific line ranges. Prefer over re-reading chunks already returned by search tools.
+- **Combine tools** when needed: `glob` to locate files -> `grep` for exact symbols inside them -> `CodeSemanticSearch` for behavior questions -> `CodeGraphSearch` for impact/dependency tracing.
+- **Break down large questions** into smaller, focused searches. Don't combine multiple intents (e.g., "what is X and how does it dispatch events?") in one query - split them and run in parallel.
+- **Avoid** single-word queries (e.g., just `AuthService`) for semantic/graph search - use a full question instead (e.g., "How does AuthService authenticate users?").
 
 ## Doing work in this repo
 

@@ -39,6 +39,8 @@ extensions
 /specifications
 /wiki
 /design-kit
-/wiki
 /CLAUDE.md
-.codebase-eval
+.codebase-eval*
+.codeartsdoer
+.qoder*
+.arts
